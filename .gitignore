@@ -1,0 +1,7 @@
+/data/
+/venv/
+/reset.sh
+
+.idea/
+.vscode/
+*.iml
