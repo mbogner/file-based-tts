@@ -3,10 +3,9 @@ from dataclasses import dataclass
 import edge_tts
 
 from utils.file_utils import FileUtils
-from utils.time_utils import TimeUtils
 
 
-class FileBasedTts:
+class Speaker:
     @dataclass
     class Paragraph:
         index: int
@@ -17,13 +16,27 @@ class FileBasedTts:
     class ProcessedFile:
         dir: str
         input: str
-        paragraphs: list['FileBasedTts.Paragraph']
+        paragraphs: list['Speaker.Paragraph']
 
-    def __init__(self, voice: str):
-        self.voice: str = voice
+    @dataclass
+    class VoiceConfig:
+        voice: str = 'en-US-AndrewMultilingualNeural'
+        rate: str = "+0%"
+        volume: str = "+0%"
+        pitch: str = "+0Hz"
 
-    async def __speak_into_file(self, text: str, file_base_name: str, directory: str):
-        communicate = edge_tts.Communicate(text, voice=self.voice)
+    @staticmethod
+    async def __speak_into_file(text: str,
+                                file_base_name: str,
+                                directory: str,
+                                voice_config: VoiceConfig):
+        communicate = edge_tts.Communicate(
+            text=text,
+            voice=voice_config.voice,
+            rate=voice_config.rate,
+            volume=voice_config.volume,
+            pitch=voice_config.pitch
+        )
         await communicate.save(f'{directory}/{file_base_name}.wav')
 
     @staticmethod
@@ -31,45 +44,65 @@ class FileBasedTts:
         await FileUtils.write_to_new_file(text, f'{directory}/{file_base_name}.txt')
 
     @staticmethod
-    def generation_filename(index, filename) -> str:
+    def __create_output_filename(index, filename) -> str:
         formatted_line = '{:03d}'.format(index)
         file_without_extension = FileUtils.name_without_extension(filename)
         return f'{file_without_extension}-p{formatted_line}'
 
-    async def __text_to_speech(self, session_dir: str, filename: str, file_path: str) -> ProcessedFile:
+    @staticmethod
+    async def __text_to_speech(session_dir: str,
+                               filename: str,
+                               file_path: str,
+                               voice_config: VoiceConfig) -> ProcessedFile:
         text = await FileUtils.slurp_paragraphs(file_path)
 
-        paragraphs: list[FileBasedTts.Paragraph] = []
+        paragraphs: list[Speaker.Paragraph] = []
         for index, paragraph in enumerate(text):
             await FileUtils.create_folder_if_missing(session_dir)
-            file_base_name = FileBasedTts.generation_filename(index, filename)
+            file_base_name = Speaker.__create_output_filename(index, filename)
 
-            paragraphs.append(FileBasedTts.Paragraph(
+            paragraphs.append(Speaker.Paragraph(
                 index=index, text=paragraph, filename=file_base_name
             ))
 
-            await self.__speak_into_file(
-                text=paragraph, file_base_name=file_base_name, directory=session_dir
+            await Speaker.__speak_into_file(
+                text=paragraph, file_base_name=file_base_name, directory=session_dir,
+                voice_config=voice_config
             )
-            await FileBasedTts.__write_paragraph_to_file(
+            await Speaker.__write_paragraph_to_file(
                 text=paragraph, file_base_name=file_base_name, directory=session_dir
             )
 
         await FileUtils.move_file_to_folder(file_path, session_dir)
-        return FileBasedTts.ProcessedFile(
+        return Speaker.ProcessedFile(
             dir=session_dir, input=filename, paragraphs=paragraphs
         )
 
-    async def process_files(self, data_dir: str) -> list[ProcessedFile]:
-        session = TimeUtils.utc_unix()
+    @staticmethod
+    async def read_files_from(data_dir: str,
+                              session: int,
+                              config_file: str,
+                              voice_config: VoiceConfig = VoiceConfig()) -> list[ProcessedFile]:
         session_dir = f'{data_dir}/{session}'
-        print(f'session: {session}, dir: {session_dir}')
+        print(f'session: {session}, dir: {session_dir}, config_file: {config_file}')
 
-        all_processed: list[FileBasedTts.ProcessedFile] = []
+        ext_conf = await FileUtils.parse_json(config_file)
+        if ext_conf is not None:
+            voice_config = Speaker.VoiceConfig(
+                voice=ext_conf['voice'],
+                rate=ext_conf['rate'],
+                volume=ext_conf['volume'],
+                pitch=ext_conf['pitch']
+            )
+            print(f'speaker json config: {voice_config}')
+
+        all_processed: list[Speaker.ProcessedFile] = []
         await FileUtils.create_folder_if_missing(data_dir)
         for filename in await FileUtils.files_in_folder(data_dir):
             file_path = f'{data_dir}/{filename}'
             print(f'processing {file_path}')
-            processed = await self.__text_to_speech(session_dir, filename, file_path)
+            processed = await Speaker.__text_to_speech(
+                session_dir=session_dir, filename=filename, file_path=file_path,
+                voice_config=voice_config)
             all_processed.append(processed)
         return all_processed

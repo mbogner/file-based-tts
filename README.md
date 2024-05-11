@@ -26,16 +26,48 @@ source venv/bin/activate
 pip install --upgrade -r requirements.txt
 ```
 
+## Configuration
+
+Create a file `tts.json` in `./data` directory with the config of your directory and speakers. Here a config:
+
+```json
+{
+  "folders": [
+    {
+      "dir": "./data/speaker1",
+      "config": "./data/speaker1.json"
+    },
+    {
+      "dir": "./data/speaker2",
+      "config": "./data/speaker2.json"
+    }
+  ]
+}
+```
+
+Create the directories mentioned in your config file and place `.txt` files in them.
+
+Also create the mandatory speakers.json files that look like this:
+
+```json
+{
+  "voice": "en-US-BrianMultilingualNeural",
+  "rate": "+0%",
+  "volume": "+0%",
+  "pitch": "+0Hz"
+}
+```
+
+This way you can create text for multiple speakers and configurations with a single run of the application.
+
 ## Run the app
 
-Place `.txt` files into `./data` directory and run `app.py` with the provided venv.
+Make sure required config files are in place. Then run:
 
 ```shell
 source venv/bin/activate
 python3 app.py
 ```
-
-The `./data` directory is created if it doesn't exist. So you can run the app to initialise the input directory.
 
 ## Voices
 

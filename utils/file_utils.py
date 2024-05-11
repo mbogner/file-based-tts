@@ -1,5 +1,7 @@
+import json
 import os
 import shutil
+from typing import Optional
 
 
 class FileUtils:
@@ -25,6 +27,11 @@ class FileUtils:
         return data
 
     @staticmethod
+    async def slurp_file(file_path: str) -> str:
+        with open(file_path) as x:
+            return x.read()
+
+    @staticmethod
     async def move_file_to_folder(file: str, target_dir: str):
         await FileUtils.create_folder_if_missing(target_dir)
         shutil.move(file, target_dir)
@@ -41,3 +48,14 @@ class FileUtils:
             raise f'file {file} already exists'
         with open(file, 'w') as file:
             file.write(text)
+
+    @staticmethod
+    async def parse_json(file: str, required: bool = False) -> Optional[dict]:
+        if os.path.isfile(file):
+            speaker_json_str = await FileUtils.slurp_file(file)
+            return json.loads(speaker_json_str)
+        else:
+            if required is True:
+                raise f'required file {file} not found'
+            else:
+                return None
