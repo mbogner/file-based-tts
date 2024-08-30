@@ -116,6 +116,6 @@ class Speaker:
     async def wav_to_mp3(path_without_extension: str):
         wav = f'{path_without_extension}.wav'
         if os.path.isfile(wav):
-            await ffmpeg.input(wav).output(f'{path_without_extension}.mp3').run(quiet=True)
+            ffmpeg.input(wav).output(f'{path_without_extension}.mp3').run(quiet=True)
         else:
             print(f'file {wav} does not exist')

@@ -6,11 +6,6 @@ from deep_translator import GoogleTranslator
 
 from utils.file_utils import FileUtils, FileData
 
-translations = ['de', 'hi', 'zh-CN', 'ru', ]
-translators = [
-    GoogleTranslator(source='en', target=lang) for lang in translations
-]
-
 
 @dataclass(frozen=True)
 class SRTEntry:
@@ -58,18 +53,22 @@ async def parse_srt_file(text: str) -> SRT:
     return SRT(entries=srt_entries)
 
 
-async def run():
-    if len(sys.argv) < 2:
-        print(f"Usage: python {sys.argv[0]} <srt_file>")
-        return
-    data: FileData = await FileUtils.read_file(sys.argv[1], exp_ext='.srt')
+async def translate_srt(path: str, source_language: str = 'en', target_languages: list[str] = None):
+    print(f'processing {path}')
+    if target_languages is None:
+        target_languages = ['de', 'hi', 'zh-CN', 'ru', ]
+    data: FileData = await FileUtils.read_file(path, exp_ext='.srt')
     srt: SRT = await parse_srt_file(data.content)
-    for translator in translators:
+    for translator in [
+        GoogleTranslator(source=source_language, target=lang) for lang in target_languages
+    ]:
         print(f'translating to {translator.target}')
         srt.translate(translator).write_to(path=f'{data.dir}/{data.base}_{translator.target}{data.ext}')
-
     print('done')
 
 
 if __name__ == '__main__':
-    asyncio.run(run())
+    if len(sys.argv) < 2:
+        print(f"Usage: python {sys.argv[0]} <srt_file>")
+    else:
+        asyncio.run(translate_srt(path=sys.argv[1]))

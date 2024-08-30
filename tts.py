@@ -16,7 +16,9 @@ async def run():
     for folder in folders:
         created_files = await Speaker.read_files_from(data_dir=folder['dir'], session=session,
                                                       config_file=folder['config'])
-        print(f"done with {folder['dir']} - created {len(created_files)} files:")
+        print(f"done with {folder['dir']} - processed {len(created_files)} input files:")
+
+        print("converting wav to mp3:")
         for created_file in created_files:
             for paragraph in created_file.paragraphs:
                 p_file = f'{created_file.dir}/{paragraph.filename}'
