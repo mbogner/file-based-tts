@@ -1,4 +1,5 @@
 import asyncio
+import sys
 
 from file_based_tts import Speaker
 from utils.file_utils import FileUtils
@@ -6,10 +7,19 @@ from utils.time_utils import TimeUtils
 
 
 async def run():
+    if len(sys.argv) < 2:
+        print(f"Usage: python {sys.argv[0]} <folder_name>")
+        return
+    folder_name = sys.argv[1]
     session = TimeUtils.utc_unix()
-    folders = (await FileUtils.parse_json(file="./data/tts.json", required=True))['folders']
+    folders = (await FileUtils.parse_json(file=f"./{folder_name}/tts.json", required=True))['folders']
     for folder in folders:
-        await Speaker.read_files_from(data_dir=folder['dir'], session=session, config_file=folder['config'])
+        created_files = await Speaker.read_files_from(data_dir=folder['dir'], session=session,
+                                                      config_file=folder['config'])
+        print(f"done with {folder['dir']} - created {len(created_files)} files:")
+        for created_file in created_files:
+            for paragraph in created_file.paragraphs:
+                print(f" - {created_file.input}: {paragraph.filename}")
     print('done')
 
 

@@ -1,3 +1,4 @@
+import os
 from dataclasses import dataclass
 
 import edge_tts
@@ -73,7 +74,7 @@ class Speaker:
                 text=paragraph, file_base_name=file_base_name, directory=session_dir
             )
 
-        await FileUtils.move_file_to_folder(file_path, session_dir)
+        # await FileUtils.move_file_to_folder(file_path, session_dir)
         return Speaker.ProcessedFile(
             dir=session_dir, input=filename, paragraphs=paragraphs
         )
@@ -98,8 +99,12 @@ class Speaker:
 
         all_processed: list[Speaker.ProcessedFile] = []
         await FileUtils.create_folder_if_missing(data_dir)
-        for filename in await FileUtils.files_in_folder(data_dir):
+        file_in_folder = sorted(await FileUtils.files_in_folder(data_dir))
+        for filename in file_in_folder:
             file_path = f'{data_dir}/{filename}'
+            if filename == '.DS_Store':
+                os.remove(file_path)
+                continue
             print(f'processing {file_path}')
             processed = await Speaker.__text_to_speech(
                 session_dir=session_dir, filename=filename, file_path=file_path,

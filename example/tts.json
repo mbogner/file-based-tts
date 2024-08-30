@@ -1,0 +1,12 @@
+{
+  "folders": [
+    {
+      "dir": "./example/speaker1",
+      "config": "./example/speaker1.json"
+    },
+    {
+      "dir": "./example/speaker2",
+      "config": "./example/speaker2.json"
+    }
+  ]
+}

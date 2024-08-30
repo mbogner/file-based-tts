@@ -1,0 +1,3 @@
+In Bash, you can use the rm command with a wildcard pattern to delete files starting with a number. Here's how you can do it:
+
+rm -rf ./data/[0-9]*

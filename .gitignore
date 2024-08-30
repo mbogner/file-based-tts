@@ -1,7 +1,9 @@
-/data/
+/audio/
 /venv/
 /reset.sh
-
 .idea/
 .vscode/
 *.iml
+
+/example/speaker*/**/*
+!/example/speaker*/*.txt
