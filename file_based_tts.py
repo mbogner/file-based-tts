@@ -2,6 +2,7 @@ import os
 from dataclasses import dataclass
 
 import edge_tts
+import ffmpeg
 
 from utils.file_utils import FileUtils
 
@@ -74,7 +75,6 @@ class Speaker:
                 text=paragraph, file_base_name=file_base_name, directory=session_dir
             )
 
-        # await FileUtils.move_file_to_folder(file_path, session_dir)
         return Speaker.ProcessedFile(
             dir=session_dir, input=filename, paragraphs=paragraphs
         )
@@ -111,3 +111,11 @@ class Speaker:
                 voice_config=voice_config)
             all_processed.append(processed)
         return all_processed
+
+    @staticmethod
+    async def wav_to_mp3(path_without_extension: str):
+        wav = f'{path_without_extension}.wav'
+        if os.path.isfile(wav):
+            await ffmpeg.input(wav).output(f'{path_without_extension}.mp3').run(quiet=True)
+        else:
+            print(f'file {wav} does not exist')

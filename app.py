@@ -1,8 +1,6 @@
 import asyncio
 import sys
 
-import ffmpeg
-
 from file_based_tts import Speaker
 from utils.file_utils import FileUtils
 from utils.time_utils import TimeUtils
@@ -23,7 +21,7 @@ async def run():
             for paragraph in created_file.paragraphs:
                 p_file = f'{created_file.dir}/{paragraph.filename}'
                 print(f" - {created_file.input}: {p_file}")
-                ffmpeg.input(f'{p_file}.wav').output(f'{p_file}.mp3').run(quiet=True)
+                await Speaker.wav_to_mp3(p_file)
     print('done')
 
 
