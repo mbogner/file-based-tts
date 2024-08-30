@@ -7,3 +7,4 @@
 
 /example/speaker*/**/*
 !/example/speaker*/*.txt
+/example/subtitles_*

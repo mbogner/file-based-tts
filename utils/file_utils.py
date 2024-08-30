@@ -1,7 +1,18 @@
 import json
 import os
 import shutil
+from dataclasses import dataclass
 from typing import Optional
+
+
+@dataclass
+class FileData:
+    path: str
+    dir: str
+    name: str
+    base: str
+    ext: str
+    content: Optional[str] = None
 
 
 class FileUtils:
@@ -14,6 +25,33 @@ class FileUtils:
     @staticmethod
     def name_without_extension(path: str) -> str:
         return os.path.splitext(os.path.basename(path))[0]
+
+    @staticmethod
+    def extension(path: str) -> str:
+        return os.path.splitext(os.path.basename(path))[1]
+
+    @staticmethod
+    async def read_file(path: str, exp_ext: Optional[str] = None) -> FileData:
+        if not os.path.isfile(path):
+            raise RuntimeError(f'file does not exist: {path}')
+
+        filename = os.path.basename(path)
+        split = os.path.splitext(filename)
+        file_dir = os.path.dirname(path)
+
+        if len(split) < 2:
+            raise RuntimeError(f'could not parse filename {path}')
+        ext = split[1]
+        if exp_ext is not None and exp_ext != ext:
+            raise RuntimeError(f'unexpected extensions: {ext}')
+        return FileData(
+            path=path,
+            dir=file_dir,
+            name=filename,
+            base=split[0],
+            ext=ext,
+            content=await FileUtils.slurp_file(path)
+        )
 
     @staticmethod
     async def slurp_paragraphs(file_path: str) -> list[str]:
