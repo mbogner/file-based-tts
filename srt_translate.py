@@ -68,7 +68,15 @@ async def translate_srt(path: str, source_language: str = 'en', target_languages
 
 
 if __name__ == '__main__':
-    if len(sys.argv) < 2:
-        print(f"Usage: python {sys.argv[0]} <srt_file>")
+    args = len(sys.argv)
+    if args < 2:
+        print(f"Usage: python {sys.argv[0]} <srt_file> (<source_language> <target_languages_csv>)")
     else:
-        asyncio.run(translate_srt(path=sys.argv[1]))
+        if args >= 4:
+            asyncio.run(translate_srt(
+                path=sys.argv[1],
+                source_language=sys.argv[2],
+                target_languages=sys.argv[3].split(','),
+            ))
+        else:
+            asyncio.run(translate_srt(path=sys.argv[1]))

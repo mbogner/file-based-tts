@@ -94,6 +94,6 @@ class FileUtils:
             return json.loads(speaker_json_str)
         else:
             if required is True:
-                raise f'required file {file} not found'
+                raise RuntimeError(f'required file {file} not found')
             else:
                 return None

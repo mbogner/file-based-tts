@@ -66,9 +66,28 @@ Make sure required config files are in place. Then run:
 
 ```shell
 source venv/bin/activate
-python3 app.py
+python3 tts.py example
 ```
 
 ## Voices
 
 You can run `./utils/tts.py` to list all available voices.
+
+## SRT Translations
+
+There is also support to automatically translate srt files into various languages. After running the script there will
+be translations files next to the original.
+
+### Default Languages
+
+```shell
+source venv/bin/activate
+python3 srt_translate.py example/subtitles.srt
+```
+
+### Custom Languages
+
+```shell
+source venv/bin/activate
+python3 srt_translate.py example/subtitles.srt en de,ru,hi
+```
