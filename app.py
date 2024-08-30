@@ -1,6 +1,8 @@
 import asyncio
 import sys
 
+import ffmpeg
+
 from file_based_tts import Speaker
 from utils.file_utils import FileUtils
 from utils.time_utils import TimeUtils
@@ -19,7 +21,9 @@ async def run():
         print(f"done with {folder['dir']} - created {len(created_files)} files:")
         for created_file in created_files:
             for paragraph in created_file.paragraphs:
-                print(f" - {created_file.input}: {paragraph.filename}")
+                p_file = f'{created_file.dir}/{paragraph.filename}'
+                print(f" - {created_file.input}: {p_file}")
+                ffmpeg.input(f'{p_file}.wav').output(f'{p_file}.mp3').run(quiet=True)
     print('done')
 
 

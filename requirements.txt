@@ -1,1 +1,2 @@
-edge-tts
+edge-tts==6.1.12
+ffmpeg-python==0.2.0
